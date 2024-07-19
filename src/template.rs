@@ -4,11 +4,11 @@ use std::fs;
 
 const INPUT_FILE_PATH: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/inputs/day??.txt");
 
-fn solve_part1(input: String) -> Result<()> {
+fn solve_part1(input: String) -> Result<i64> {
     todo!();
 }
 
-fn solve_part2(input: String) -> Result<()> {
+fn solve_part2(input: String) -> Result<i64> {
     todo!();
 }
 fn main() -> Result<()> {
@@ -42,6 +42,7 @@ mod tests {
         Ok(())
     }
 
+    #[test]
     fn assumptions() -> Result<()> {
         todo!();
         Ok(())

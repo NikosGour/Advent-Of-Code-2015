@@ -46,6 +46,8 @@ fn main() -> Result<()> {
 
 #[cfg(test)]
 mod tests {
+    use std::collections::HashSet;
+
     use super::*;
 
     #[test]
@@ -65,6 +67,29 @@ mod tests {
     fn part2_cases() -> Result<()> {
         assert_eq!(solve_part2(")".into())?, 1);
         assert_eq!(solve_part2("()())".into())?, 5);
+        Ok(())
+    }
+
+    #[test]
+    fn assumptions() -> Result<()> {
+        let mut set: HashSet<char> = HashSet::new();
+
+        let input = fs::read_to_string(INPUT_FILE_PATH)?;
+
+        input.chars().for_each(|c| {
+            set.insert(c);
+        });
+
+        let chars_in_input_that_are_not_parens = set
+            .into_iter()
+            .filter(|c| !(*c == ')' || *c == '('))
+            .collect::<Vec<_>>();
+
+        eprintln!(
+            "{color_bright_red}Other chars found in input = {:?}{style_reset}",
+            chars_in_input_that_are_not_parens
+        );
+        assert_eq!(chars_in_input_that_are_not_parens.len(), 0);
         Ok(())
     }
 }
