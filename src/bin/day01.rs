@@ -32,10 +32,10 @@ fn main() -> Result<()> {
     color_eyre::install()?;
     let input = fs::read_to_string(INPUT_FILE_PATH)?;
 
-    // println!(
-    //     "{color_bright_green}Solution for part1 = `{}`{style_reset}",
-    //     solve_part1(input.clone())?
-    // );
+    println!(
+        "{color_bright_green}Solution for part1 = `{}`{style_reset}",
+        solve_part1(input.clone())?
+    );
 
     println!(
         "{color_bright_green}Solution for part2 = `{}`{style_reset}",
@@ -80,9 +80,10 @@ mod tests {
             set.insert(c);
         });
 
+        const CHARS_THAT_EXIST: [char; 2] = ['(', ')'];
         let chars_in_input_that_are_not_parens = set
             .into_iter()
-            .filter(|c| !(*c == ')' || *c == '('))
+            .filter(|c| !CHARS_THAT_EXIST.contains(c))
             .collect::<Vec<_>>();
 
         eprintln!(

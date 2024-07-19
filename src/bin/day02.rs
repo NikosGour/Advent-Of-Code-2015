@@ -96,10 +96,10 @@ fn main() -> Result<()> {
     color_eyre::install()?;
     let input = fs::read_to_string(INPUT_FILE_PATH)?;
 
-    // println!(
-    //     "{color_bright_green}Solution for part1 = `{}`{style_reset}",
-    //     solve_part1(input.clone())?
-    // );
+    println!(
+        "{color_bright_green}Solution for part1 = `{}`{style_reset}",
+        solve_part1(input.clone())?
+    );
 
     println!(
         "{color_bright_green}Solution for part2 = `{}`{style_reset}",
