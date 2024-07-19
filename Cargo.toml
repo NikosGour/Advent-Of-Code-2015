@@ -7,7 +7,6 @@ edition = "2021"
 inline_colorization = "0.1.6"
 color-eyre = "0.6.3"
 
-
 # [lints.clippy]
 # all = "warn"
 # cargo = "allow"
