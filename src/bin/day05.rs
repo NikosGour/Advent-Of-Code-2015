@@ -1,15 +1,108 @@
+use std::collections::HashMap;
 use color_eyre::eyre::Result;
 use inline_colorization::*;
 use std::fs;
+use std::thread::park;
+use advent_of_code::utils::testing;
 
-const INPUT_FILE_PATH: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/inputs/day??.txt");
+const INPUT_FILE_PATH: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/inputs/day05.txt");
 
 fn solve_part1(input: String) -> Result<i64> {
-    todo!();
+    let mut solution: i64 = 0;
+    let strings = input.split('\n');
+
+    let ugly_pairs = ["ab", "cd", "pq", "xy"];
+    let vowels = "aeiou";
+
+    for string in strings {
+        let (mut rule_vowels, mut rule_duplicate_letter, mut rule_nice_letters) = (false, false, true);
+        let mut num_of_vowels: u32 = 0;
+
+        for (i, c) in string.chars().enumerate() {
+            if i < string.len() - 1 {
+                // Find if the string contains ugly letters
+                let pair = &string[i..=i + 1];
+                if ugly_pairs.contains(&pair) {
+                    rule_nice_letters = false;
+                    break;
+                }
+
+                // Check if there are pairs of the same letter
+                if pair[0..1] == pair[1..2] {
+                    rule_duplicate_letter = true;
+                }
+            }
+
+            // Add vowels to a vec
+            if vowels.contains(c) { num_of_vowels += 1 }
+        }
+        rule_vowels = num_of_vowels >= 3;
+
+
+        if rule_vowels && rule_duplicate_letter && rule_nice_letters {
+            solution += 1;
+        }
+    }
+    Ok(solution)
 }
 
 fn solve_part2(input: String) -> Result<i64> {
-    todo!();
+    let mut solution: i64 = 0;
+    let strings = input.split('\n');
+    for string in strings {
+        let (mut rule_double_pair, mut rule_third_wheel) = (false, false);
+        rule_double_pair = crate::rule_double_pair(string.to_string());
+        rule_third_wheel = crate::rule_third_wheel(string.to_string());
+        if rule_double_pair && rule_third_wheel {
+            solution += 1;
+        }
+    }
+    Ok(solution)
+}
+fn rule_double_pair(string: String) -> bool {
+    let mut result = false;
+    let mut pairs_with_indecies_hashmap: HashMap<(char, char), (usize, usize)> = HashMap::new();
+    for i in 0..string.len() {
+        // First checking pair by pair
+        if i < (string.len() - 1) {
+            let pair = &string[i..=i + 1];
+            let mut pair_chars = pair.chars();
+            let (left, right) = (pair_chars.next().unwrap(), pair_chars.next().unwrap());
+
+            let entry = pairs_with_indecies_hashmap.get(&(left, right));
+            match entry {
+                Some((_start, end)) => {
+                    // TODO: If no more code is added , change this to `rule_double_pair = expression`
+                    if *end == i {
+                        *pairs_with_indecies_hashmap.get_mut(&(left, right)).unwrap() = (i, i + 1);
+                    } else {
+                        if !result {
+                            result = true;
+                        }
+                        *pairs_with_indecies_hashmap.get_mut(&(left, right)).unwrap() = (i, i + 1);
+                    }
+                }
+                None => { pairs_with_indecies_hashmap.insert((left, right), (i, i + 1)); }
+            };
+        }
+    }
+
+    result
+}
+fn rule_third_wheel(string: String) -> bool {
+    let mut result = false;
+    for i in 0..string.len() {
+        if i < (string.len() - 1) - 1 {
+            let triple = string[i..=i + 2].to_string();
+            let mut triple_chars = triple.chars();
+            let (left, _, right) = (triple_chars.next().unwrap(), triple_chars.next().unwrap(), triple_chars.next().unwrap());
+
+            if !result {
+                result = left == right;
+            }
+        }
+    }
+    result
 }
 fn main() -> Result<()> {
     color_eyre::install()?;
@@ -20,10 +113,10 @@ fn main() -> Result<()> {
         solve_part1(input.clone())?
     );
 
-    // println!(
-    //     "{color_bright_green}Solution for part2 = `{}`{style_reset}",
-    //     solve_part2(input.clone())?
-    // );
+    println!(
+        "{color_bright_green}Solution for part2 = `{}`{style_reset}",
+        solve_part2(input.clone())?
+    );
     Ok(())
 }
 
@@ -33,18 +126,39 @@ mod tests {
 
     #[test]
     fn part1_cases() -> Result<()> {
-        todo!();
+        assert_eq!(solve_part1("ugknbfddgicrmopn".to_string())?, 1);
+        assert_eq!(solve_part1("aaa".to_string())?, 1);
+        assert_eq!(solve_part1("jchzalrnumimnmhp".to_string())?, 0);
+        assert_eq!(solve_part1("haegwjzuvuyypxyu".to_string())?, 0);
+        assert_eq!(solve_part1("dvszwmarrgswjxmb".to_string())?, 0);
         Ok(())
     }
     #[test]
     fn part2_cases() -> Result<()> {
-        todo!();
+        assert_eq!(solve_part2("qjhvhtzxzqqjkmpb".to_string())?, 1);
+        assert_eq!(solve_part2("xxyxx".to_string())?, 1);
+        assert_eq!(solve_part2("uurcxstgmygtbstg".to_string())?, 0);
+        assert_eq!(solve_part2("ieodomkazucvgmuy".to_string())?, 0);
         Ok(())
     }
 
     #[test]
     fn assumptions() -> Result<()> {
-        todo!();
+        Ok(())
+    }
+    #[test]
+    fn rule_double_pair() -> Result<()> {
+        assert_eq!(super::rule_double_pair("xyxy".to_string()), true);
+        assert_eq!(super::rule_double_pair("aabcdefgaa".to_string()), true);
+        assert_eq!(super::rule_double_pair("aaa".to_string()), false);
+        Ok(())
+    }
+
+    #[test]
+    fn rule_third_wheel() -> Result<()> {
+        assert_eq!(super::rule_third_wheel("xyx".to_string()), true);
+        assert_eq!(super::rule_third_wheel("abcdefeghi".to_string()), true);
+        assert_eq!(super::rule_third_wheel("aaa".to_string()), true);
         Ok(())
     }
 }
