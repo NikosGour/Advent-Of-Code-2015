@@ -4,6 +4,7 @@ use inline_colorization::*;
 use std::fs;
 use std::thread::park;
 use advent_of_code::utils::testing;
+use fancy_regex::Regex;
 
 const INPUT_FILE_PATH: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/inputs/day05.txt");
 
@@ -49,10 +50,13 @@ fn solve_part1(input: String) -> Result<i64> {
 fn solve_part2(input: String) -> Result<i64> {
     let mut solution: i64 = 0;
     let strings = input.split('\n');
+    let rule_double_pair_regex = Regex::new(r"(..).*\1")?;
+    let rule_third_wheel_regex = Regex::new(r"(.).\1")?;
     for string in strings {
         let (mut rule_double_pair, mut rule_third_wheel) = (false, false);
         rule_double_pair = crate::rule_double_pair(string.to_string());
         rule_third_wheel = crate::rule_third_wheel(string.to_string());
+
         if rule_double_pair && rule_third_wheel {
             solution += 1;
         }
@@ -61,30 +65,26 @@ fn solve_part2(input: String) -> Result<i64> {
 }
 fn rule_double_pair(string: String) -> bool {
     let mut result = false;
-    let mut pairs_with_indecies_hashmap: HashMap<(char, char), (usize, usize)> = HashMap::new();
+    let mut pairs_with_indexes_hashmap: HashMap<(char, char), (usize, usize)> = HashMap::new();
     for i in 0..string.len() {
-        // First checking pair by pair
         if i < (string.len() - 1) {
             let pair = &string[i..=i + 1];
             let mut pair_chars = pair.chars();
             let (left, right) = (pair_chars.next().unwrap(), pair_chars.next().unwrap());
 
-            let entry = pairs_with_indecies_hashmap.get(&(left, right));
+            let entry = pairs_with_indexes_hashmap.get(&(left, right));
             match entry {
                 Some((_start, end)) => {
-                    // TODO: If no more code is added , change this to `rule_double_pair = expression`
-                    if *end == i {
-                        *pairs_with_indecies_hashmap.get_mut(&(left, right)).unwrap() = (i, i + 1);
-                    } else {
-                        if !result {
-                            result = true;
-                        }
-                        *pairs_with_indecies_hashmap.get_mut(&(left, right)).unwrap() = (i, i + 1);
+                    if !result && *end != i {
+                        result = true;
+                        *pairs_with_indexes_hashmap.get_mut(&(left, right)).unwrap() = (i, i + 1);
                     }
                 }
-                None => { pairs_with_indecies_hashmap.insert((left, right), (i, i + 1)); }
+                None => { pairs_with_indexes_hashmap.insert((left, right), (i, i + 1)); }
             };
         }
+
+        if result { break; }
     }
 
     result
@@ -101,7 +101,9 @@ fn rule_third_wheel(string: String) -> bool {
                 result = left == right;
             }
         }
+        if result { break; }
     }
+
     result
 }
 fn main() -> Result<()> {
@@ -139,6 +141,7 @@ mod tests {
         assert_eq!(solve_part2("xxyxx".to_string())?, 1);
         assert_eq!(solve_part2("uurcxstgmygtbstg".to_string())?, 0);
         assert_eq!(solve_part2("ieodomkazucvgmuy".to_string())?, 0);
+        assert_eq!(solve_part2("rxexcbwhiywwwwnu".to_string())?, 0);
         Ok(())
     }
 
