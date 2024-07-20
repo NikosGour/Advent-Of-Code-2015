@@ -6,6 +6,7 @@ edition = "2021"
 [dependencies]
 inline_colorization = "0.1.6"
 color-eyre = "0.6.3"
+md5 = "0.7.0"
 
 # [lints.clippy]
 # all = "warn"
